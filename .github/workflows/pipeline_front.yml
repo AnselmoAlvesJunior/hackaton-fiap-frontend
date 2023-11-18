@@ -35,3 +35,27 @@ jobs:
         run: | 
           docker build -t ${{ vars.GOOGLE_ARTIFACT }}/${{ vars.GOOGLE_PROJECT_ID }}/${{ vars.GOOGLE_REPONAME }}/${{ vars.GOOGLE_MYAPP }}:latest .
           docker push ${{ vars.GOOGLE_ARTIFACT }}/${{ vars.GOOGLE_PROJECT_ID }}/${{ vars.GOOGLE_REPONAME }}/${{ vars.GOOGLE_MYAPP }}:latest
+
+  Deploy-Production:
+    needs: Build
+    runs-on: ubuntu-latest
+ 
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v3
+ 
+      - name: Auth GCP
+        uses: "google-github-actions/auth@v1"
+        with:
+          credentials_json: "${{ secrets.GOOGLE_CREDENTIALS }}"
+ 
+      - name: Cloud Run Deploy - Production
+        id: prod-deploy
+        uses: "google-github-actions/deploy-cloudrun@v1"
+        with:
+          service: ${{ vars.GOOGLE_MYAPP }}-prod
+          image: ${{ vars.GOOGLE_ARTIFACT }}/${{ vars.GOOGLE_PROJECT_ID }}/${{ vars.GOOGLE_REPONAME }}/${{ vars.GOOGLE_MYAPP }}:latest
+          flags: "--allow-unauthenticated"
+ 
+      - name: Test Prod
+        run: 'curl "${{ steps.prod-deploy.outputs.url }}"'
