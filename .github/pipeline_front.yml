@@ -1,0 +1,37 @@
+name: Frontend Pipeline
+
+on: 
+  push:
+    branches:
+      - main
+
+jobs:
+  Build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download do Repositório
+        uses: actions/checkout@v3
+      
+      - uses: actions/checkout@v1
+      - name: Set up NODE.js 13.10
+        uses: actions/setup-node@v1
+        with:
+          node-version: '16.15'
+      
+      - name: Install Requirements
+        run: npm install
+
+      - name: SonarCloud Scan
+        uses: sonarsource/sonarcloud-github-action@master
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+      - name: Docker Login
+        run: | 
+          echo '${{ secrets.GOOGLE_CREDENTIALS }}' > key.json
+          cat key.json | docker login -u _json_key --password-stdin '${{ vars.GOOGLE_ARTIFACT }}'
+
+      - name: Build & Push Image
+        run: | 
+          docker build -t ${{ vars.GOOGLE_ARTIFACT }}/${{ vars.GOOGLE_PROJECT_ID }}/${{ vars.GOOGLE_REPONAME }}/${{ vars.GOOGLE_MYAPP }}:latest .
+          docker push ${{ vars.GOOGLE_ARTIFACT }}/${{ vars.GOOGLE_PROJECT_ID }}/${{ vars.GOOGLE_REPONAME }}/${{ vars.GOOGLE_MYAPP }}:latest

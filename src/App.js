@@ -12,14 +12,15 @@ function App() {
       		 .catch((err) => console.log("error"));
 	}, []);
   return (
-    <div class="divTable">
+    <div id= "divTable" className="divTable">
+      <h1>SpotMusic</h1>
       {data &&
         data.map((element, index) => (
-        <div class="headRow">
-          <div class="divCell" align="center">{element.song_id}</div>
-          <div class="divCell divCellName">{element.title}</div>
-          <div class="divCell divCellName">{element.artist}</div>
-          <div class="divCell" align="center">{element.genre}</div>
+        <div className="headRow">
+          <div className="divCell" align="center">{element.song_id}</div>
+          <div className="divCell divCellName">{element.title}</div>
+          <div className="divCell divCellName">{element.artist}</div>
+          <div className="divCell" align="center">{element.genre}</div>
           </div>
         ))}
     </div>
